@@ -14,3 +14,6 @@ DeerFlow（Deep Exploration and Efficient Research Flow）实现了一个模块�
 - **[LangChain](https://github.com/langchain-ai/langchain)**：他们卓越的框架为我们的LLM交互和链提供动力，实现了无缝集成和功能。
 - **[LangGraph](https://github.com/langchain-ai/langgraph)**：他们在多智能体编排方面的创新方法对于实现DeerFlow复杂工作流至关重要。
 
+
+
+<center><img src="../assets/langgraph/deerflow-arch.png"></center>
