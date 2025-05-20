@@ -1,38 +1,27 @@
-from langgraph.graph import MessageState, StateGraph, START, END
+from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
-from planner import Plan
+# from planner import Plan  # Not used, remove for now
 
 from .nodes import (
-    coordinator_node,
     planner_node,
-    reporter_node,
-    researcher_node,
-    drawer_node,
-    poster_node
+    research_team,
+    poster_node,
+    State
 )
 
-
-class State(MessageState):
-    """State for the agent system, extends MessagesState with next field."""
-
-    # Runtime Variables
-    plan_iterations: int = 0
-    current_plan: Plan | str = None
-    final_report: str = None
-
+# Twitter workflow: planner -> research_team -> poster
 
 def _build_basic_graph():
     """Build and return the base state graph with all nodes and edges."""
     builder = StateGraph(State)
 
-    builder.add_node('coordinator', coordinator_node)
     builder.add_node('planner', planner_node)
-    builder.add_node('reporter', reporter_node)
-    builder.add_node('researcher', researcher_node)
-    builder.add_node('drawer', drawer_node)
-
-    builder.add_edge(START, 'coordinator')
-    builder.add_edge('reported', END)
+    builder.add_node('research_team', research_team)
+    builder.add_node('poster', poster_node)
+    builder.add_edge(START, 'planner')
+    builder.add_edge('planner', 'research_team')
+    builder.add_edge('research_team', 'poster')
+    builder.add_edge('poster', END)
     return builder
 
 def build_graph_with_memory():
@@ -64,19 +53,19 @@ if __name__ == '__main__':
         display(Image(qa_async_png))
         with open("x_agent_flow.png", "wb") as f:
             f.write(qa_async_png)
-    except Exception:
+    except Exception as e:
         # This requires some extra dependencies and is optional
+        print(f"Failed to generate graph image: {e}")
         pass
-
+    
     import pprint
     inputs = {
         "messages": [
-            ("user", "What does Lilian Weng say about the types of agent memory?"),
+            ("user", "Post a tweet: Hello Twitter! This is a test tweet from LangGraph agent."),
         ]
     }
     for output in graph.stream(inputs):
         for key, value in output.items():
-            pprint.pprint(f"Output from node '{key}':")
-            pprint.pprint("---")
+            pprint.pprint("-"*10 + f"Output from node '{key}':" + "-"*10)
             pprint.pprint(value, indent=2, width=80, depth=None)
-        pprint.pprint("\n---\n")
+        print("\n#####----------#####\n")

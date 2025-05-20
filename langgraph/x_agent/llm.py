@@ -19,6 +19,7 @@ def _create_llm_use_conf(llm_type: LLMType, conf: Dict[str, Any]) -> ChatOpenAI:
         "basic": conf.get("BASIC_MODEL"),
         "vision": conf.get("VISION_MODEL"),
     }
+
     llm_conf = llm_type_map.get(llm_type)
     if not llm_conf:
         raise ValueError(f"Unknown LLM type: {llm_type}")
@@ -37,7 +38,7 @@ def get_llm_by_type(
         return _llm_cache[llm_type]
 
     conf = load_yaml_config(
-        str((Path(__file__).parent.parent.parent / "conf.yaml").resolve())
+        str((Path(__file__).parent.parent / "conf.yaml").resolve())
     )
     llm = _create_llm_use_conf(llm_type, conf)
     _llm_cache[llm_type] = llm

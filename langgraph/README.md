@@ -1,9 +1,10 @@
-# A X(formerly Twitter) agent based on Langgraph
+# A X(formerly Twitter) agent based on LangGraph
 
 ## Setup
 
 ```bash
-
+cd langgraph
+python x_main.py
 ```
 
 
