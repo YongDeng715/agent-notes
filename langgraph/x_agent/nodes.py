@@ -1,20 +1,21 @@
-import random
+import os
+from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.types import Command, interrupt
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import MessagesState
 from dataclasses import dataclass, field
-from typing import List, Dict, Any
+from typing import List, Annotated, Literal
 
 from .agent import create_agent
 from .configuration import Configuration, AGENT_LLM_MAP
 from .llm import get_llm_by_type
-from .search_tools import web_search_tool
-from .x_tools import x_post_tool
+from .search_tools import web_search_tool, crawl_tool
+from .x_tools import x_post_tool, mock_draw_tool
 
 # --- Plan structure ---
 @dataclass
 class SubTask:
-    id: str
+    id: int
     type: str  # 'research' or 'draw'
     description: str
     params: dict = field(default_factory=dict)
@@ -46,6 +47,25 @@ def extract_user_message(msg):
         return msg["content"]
     else:
         return str(msg)
+
+PLAN_SYSTEM_PROMPT = """
+You are a X(formerly Twitter) planning agent. Your task is to create a actionable plan 
+composed of many clear subtasks to post tweets based on the user's post request.
+
+Firstly you need to think about the 'maintask' of the user's request, then list a series of
+interdependent key subtasks to execute.
+
+provide your response in JSON format with the following structure as an example:
+{
+    'maintask': 'Plan steps to post the user's first tweet',
+    'subtasks': [
+        {'research':'Draft the basic content about the user's infomation based on the user's request'},
+        {'research':'Generate a list of images about the user's hobbies, accomplishments, etc.'},
+        {'draw':'Add some content about the user's hobbies, accomplishments, etc.'},
+        {'research':'Composed the above content into a tweet text'},
+    ]
+}
+"""
 
 def planner_node(state: State, config: RunnableConfig = None):
     """Use LLM to generate a plan with multiple subtasks for researcher and drawer."""
@@ -89,15 +109,21 @@ def planner_node(state: State, config: RunnableConfig = None):
         plan_data = json.loads(plan_json)
         subtasks = [SubTask(**st) for st in plan_data.get("subtasks", [])]
         plan = Plan(tweet_text=plan_data.get("tweet_text", ""), subtasks=subtasks)
-    except Exception:
-        # Fallback: simple plan
+    except Exception as e:
+        print(f"LLM output is not structured: {plan_json}")
+        print(f"Error: {e}")
+        plan = None
+        """# Fallback: simple plan
         plan = Plan(
             tweet_text=f"[Planned Tweet] {user_message}",
+            # description=f"Complete descrtiption and appropriate supplementations for user's request."
             subtasks=[
                 SubTask(id="r1", type="research", description=f"Background for: {user_message}"),
                 SubTask(id="d1", type="draw", description=f"Illustration for: {user_message}")
             ]
         )
+        """
+    
     # Store subtasks in state for research_team_node
     state["current_plan"] = plan
     state["subtasks"] = plan.subtasks
@@ -106,30 +132,57 @@ def planner_node(state: State, config: RunnableConfig = None):
     return state
 
 # --- Node: Researcher ---
-def researcher_node(subtasks: List[SubTask]):
+# 明确 default_tools 和 agent_type
+default_tools = [web_search_tool, crawl_tool]
+agent_type = "researcher"
+
+import asyncio
+
+async def researcher_node(state: State, config: RunnableConfig = None):
+    """遍历 research 类型的 subtasks，依次执行并收集结果，存入 state['research_results']，并返回 state。"""
+    print("Researcher node is researching.")
+    configurable = Configuration.from_runnable_config(config)
+    research_subtasks = [st for st in state.get("subtasks", []) if st.type == "research"]
     results = []
-    for task in subtasks:
-        result = {"id": task.id, "result": f"[Research result for] {task.description}"}
-        results.append(result)
-    return results
+    for subtask in research_subtasks:
+        # 构造 agent 并执行
+        agent = create_agent(agent_type, agent_type, default_tools, agent_type)
+        # 构造输入
+        agent_input = {
+            "messages": [
+                HumanMessage(content=f"# Task\n\n## Title\n\n{subtask.description}\n\n## Params\n{subtask.params}")
+            ]
+        }
+        # 执行 agent
+        result = await agent.ainvoke(input=agent_input)
+        content = result["messages"][-1].content if "messages" in result and result["messages"] else str(result)
+        results.append({"id": subtask.id, "result": content})
+    state["research_results"] = results
+    return state
 
 # --- Node: Drawer ---
 def drawer_node(subtasks: List[SubTask]):
     results = []
     for task in subtasks:
-        result = {"id": task.id, "image_url": f"http://fakeimg.com/{task.id}"}
+        # 调用模拟图片生成接口
+        image_url = mock_draw_tool(task.description, task.params)
+        result = {"id": task.id, "image_url": image_url}
         results.append(result)
     return results
 
+    
+
 # --- Node: Research Team (dispatches subtasks) ---
-def research_team(state: State, config: RunnableConfig = None):
-    """Dispatch subtasks to researcher_node and drawer_node, collect results."""
+async def research_team(state: State, config: RunnableConfig = None):
+    """异步调度 researcher_node 和 drawer_node，收集结果。"""
     subtasks = state.get("subtasks", [])
     research_subtasks = [st for st in subtasks if st.type == "research"]
     draw_subtasks = [st for st in subtasks if st.type == "draw"]
-    research_results = researcher_node(research_subtasks) if research_subtasks else []
+    # 异步执行 research
+    if research_subtasks:
+        state = await researcher_node(state, config)
+    # 同步执行 draw
     draw_results = drawer_node(draw_subtasks) if draw_subtasks else []
-    state["research_results"] = research_results
     state["draw_results"] = draw_results
     return state
 
@@ -152,4 +205,99 @@ def poster_node(state: State, config: RunnableConfig = None):
     state["final_report"] = f"Tweet posted with ID: {tweet_id}"
     return state
 
+async def _execute_agent_step(
+    state: State, agent, agent_name: str
+) -> Command[Literal["research_team"]]:
+    """Helper function to execute a step using the specified agent."""
+    current_plan = state.get("current_plan")
+    observations = state.get("observations", [])
 
+    # Find the first unexecuted step
+    current_step = None
+    completed_steps = []
+    for step in current_plan.steps:
+        if not step.execution_res:
+            current_step = step
+            break
+        else:
+            completed_steps.append(step)
+
+    if not current_step:
+        print("No unexecuted step found")
+        return Command(goto="research_team")
+
+    print(f"Executing step: {current_step.title}")
+
+    # Format completed steps information
+    completed_steps_info = ""
+    if completed_steps:
+        completed_steps_info = "# Existing Research Findings\n\n"
+        for i, step in enumerate(completed_steps):
+            completed_steps_info += f"## Existing Finding {i+1}: {step.title}\n\n"
+            completed_steps_info += f"<finding>\n{step.execution_res}\n</finding>\n\n"
+
+    # Prepare the input for the agent with completed steps info
+    agent_input = {
+        "messages": [
+            HumanMessage(
+                content=f"{completed_steps_info}# Current Task\n\n## Title\n\n{current_step.title}\n\n## Description\n\n{current_step.description}\n\n## Locale\n\n{state.get('locale', 'en-US')}"
+            )
+        ]
+    }
+
+    # Add citation reminder for researcher agent
+    if agent_name == "researcher":
+        agent_input["messages"].append(
+            HumanMessage(
+                content="IMPORTANT: DO NOT include inline citations in the text. Instead, track all sources and include a References section at the end using link reference format. Include an empty line between each citation for better readability. Use this format for each reference:\n- [Source Title](URL)\n\n- [Another Source](URL)",
+                name="system",
+            )
+        )
+
+    # Invoke the agent
+    default_recursion_limit = 25
+    try:
+        env_value_str = os.getenv("AGENT_RECURSION_LIMIT", str(default_recursion_limit))
+        parsed_limit = int(env_value_str)
+
+        if parsed_limit > 0:
+            recursion_limit = parsed_limit
+            logger.info(f"Recursion limit set to: {recursion_limit}")
+        else:
+            logger.warning(
+                f"AGENT_RECURSION_LIMIT value '{env_value_str}' (parsed as {parsed_limit}) is not positive. "
+                f"Using default value {default_recursion_limit}."
+            )
+            recursion_limit = default_recursion_limit
+    except ValueError:
+        raw_env_value = os.getenv("AGENT_RECURSION_LIMIT")
+        logger.warning(
+            f"Invalid AGENT_RECURSION_LIMIT value: '{raw_env_value}'. "
+            f"Using default value {default_recursion_limit}."
+        )
+        recursion_limit = default_recursion_limit
+
+    result = await agent.ainvoke(
+        input=agent_input, config={"recursion_limit": recursion_limit}
+    )
+
+    # Process the result
+    response_content = result["messages"][-1].content
+    print(f"{agent_name.capitalize()} full response: {response_content}")
+
+    # Update the step with the execution result
+    current_step.execution_res = response_content
+    logger.info(f"Step '{current_step.title}' execution completed by {agent_name}")
+
+    return Command(
+        update={
+            "messages": [
+                HumanMessage(
+                    content=response_content,
+                    name=agent_name,
+                )
+            ],
+            "observations": observations + [response_content],
+        },
+        goto="research_team",
+    )

@@ -16,12 +16,14 @@ def _build_basic_graph():
     builder = StateGraph(State)
 
     builder.add_node('planner', planner_node)
-    builder.add_node('research_team', research_team)
+    builder.add_node('research_team', research_team, is_async_fn=True)
     builder.add_node('poster', poster_node)
+
     builder.add_edge(START, 'planner')
     builder.add_edge('planner', 'research_team')
     builder.add_edge('research_team', 'poster')
     builder.add_edge('poster', END)
+    
     return builder
 
 def build_graph_with_memory():
