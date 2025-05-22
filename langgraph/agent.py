@@ -47,7 +47,7 @@ def agent(state):
         api_key=model_conf['api_key'],
         model_name=model_conf['model_name'],
         temperature=0,
-        streaming=True
+        streaming=False
     )
     model = model.bind_tools(search_tools)
     response = model.invoke(messages)
