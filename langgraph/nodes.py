@@ -90,8 +90,7 @@ def rewrite(state):
     question = messages[0].content
 
     msg = [
-        HumanMessage(
-            content=f""" \n 
+        HumanMessage(content=f""" \n 
     Look at the input and try to reason about the underlying semantic intent / meaning. \n 
     Here is the initial question:
     \n ------- \n
@@ -128,7 +127,7 @@ def generate(state):
     prompt = hub.pull("rlm/rag-prompt")
 
     # LLM
-    llm = get_chat_openai(temperature=0, streaming=True)
+    llm = get_chat_openai(temperature=0, streaming=False)
 
     # Post-processing
     def format_docs(docs):

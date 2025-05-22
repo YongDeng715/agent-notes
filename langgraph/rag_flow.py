@@ -67,8 +67,19 @@ if __name__ == "__main__":
             ("user", f"{user_input}"),
         ]
     }
+
+    all_contents = []
     for output in graph.stream(inputs):
         for key, value in output.items():
             pprint.pprint("-"*10 + f"Output from node '{key}':" + "-"*10)
             pprint.pprint(value, indent=2, width=80, depth=None)
+            all_contents.append(value)
         print("\n"+"----"*10+"\n")
+    
+    # 打印最终所有输出内容
+    if all_contents:
+        last_content = all_contents[-1]["messages"][0].content
+        print("\n===== 总输出内容（最后一次迭代的 output） =====\n")
+        pprint.pprint(last_content, indent=2, width=80, depth=None, compact=False)
+    else:
+        print("\n===== 没有输出 =====\n")
