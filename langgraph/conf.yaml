@@ -9,16 +9,30 @@
 #   api_key: xxxx
 
 
-BASIC_MODEL:
-  base_url: "https://api.deepseek.com"
-  model: "deepseek-chat"
-  api_key: sk-3b458ee0624f41e1b8c589e74be23e44
-
-
 # BASIC_MODEL:
-#   base_url: "https://api.siliconflow.cn/v1"
-#   model: "Qwen/Qwen2.5-72B-Instruct"
-#   api_key: sk-ykbiglqspirbapnzjvrasbuhboizzqhhhjupwcwxkvhcktod
+#   base_url: "https://api.deepseek.com"
+#   model: "deepseek-chat"
+#   api_key: sk-3b458ee0624f41e1b8c589e74be23e44
 
-  
+
+BASIC_MODEL:
+  base_url: "https://api.siliconflow.cn/v1"
+  model: "Qwen/Qwen2.5-72B-Instruct"
+  api_key: sk-ykbiglqspirbapnzjvrasbuhboizzqhhhjupwcwxkvhcktod
+
+
+
+SEARCH_API:
+  names: ["tavily", "duckduckgo"]
+
+TAVILY:
+  api_key: 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
+DUCKDUCKGO:
+  api_key: your-duckduckgo-key
+ARXIV:
+  api_key: your-arxiv-key
+BRAVE:
+  api_key: your-brave-key
+
+
 

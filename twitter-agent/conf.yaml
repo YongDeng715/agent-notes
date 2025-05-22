@@ -1,0 +1,24 @@
+# [!NOTE]
+# Read the `docs/configuration_guide.md` carefully, and update the configurations to match your specific settings and requirements.
+# - Replace `api_key` with your own credentials
+# - Replace `base_url` and `model` name if you want to use a custom model
+
+# BASIC_MODEL:
+#   base_url: "http://111.12.146.19:32430/v1"
+#   model: "qwen2.5-instruct"
+#   api_key: xxxx
+
+
+BASIC_MODEL:
+  base_url: "https://api.deepseek.com"
+  model: "deepseek-chat"
+  api_key: sk-3b458ee0624f41e1b8c589e74be23e44
+
+
+# BASIC_MODEL:
+#   base_url: "https://api.siliconflow.cn/v1"
+#   model: "Qwen/Qwen2.5-72B-Instruct"
+#   api_key: sk-ykbiglqspirbapnzjvrasbuhboizzqhhhjupwcwxkvhcktod
+
+
+

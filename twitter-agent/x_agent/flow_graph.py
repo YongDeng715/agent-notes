@@ -16,7 +16,7 @@ def _build_basic_graph():
     builder = StateGraph(State)
 
     builder.add_node('planner', planner_node)
-    builder.add_node('research_team', research_team, is_async_fn=True)
+    builder.add_node('research_team', research_team)
     builder.add_node('poster', poster_node)
 
     builder.add_edge(START, 'planner')
