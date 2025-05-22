@@ -60,7 +60,7 @@ if __name__ == "__main__":
     llm = get_chat_openai(temperature=0) # Ensure your conf.yaml BASIC_MODEL is set up correctly
     llm_with_tools = llm.bind_tools(search_tools)
 
-    test_query = "请告诉一些关于 Agent 的最新资讯"
+    test_query = "国内大厂关于AI-Agent的最新成果"
     # Add a SystemMessage to guide the LLM
     messages = [
         SystemMessage(content="You are a helpful assistant that can use tools to find information."),
