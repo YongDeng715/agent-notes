@@ -12,7 +12,7 @@ def get_arxiv_api_key():
 
 @tool
 def arxiv_retriever_tool(query: str) -> list:
-    """Search Arxiv for the given query and return a list of results (title and link)."""
+    """Search Arxiv for the given query and return a list of results (title: url)."""
     url = "http://export.arxiv.org/api/query"
     params = {"search_query": query, "start": 0, "max_results": 5}
     try:
@@ -22,9 +22,12 @@ def arxiv_retriever_tool(query: str) -> list:
         ns = {'atom': 'http://www.w3.org/2005/Atom'}
         results = []
         for entry in root.findall('atom:entry', ns):
-            title = entry.find('atom:title', ns).text.strip()
-            link = entry.find('atom:id', ns).text.strip()
-            results.append(f"{title}: {link}")
-        return results or ["No results found."]
+            title_elem = entry.find('atom:title', ns)
+            link_elem = entry.find('atom:id', ns)
+            title = title_elem.text.strip() if title_elem is not None else "No Title"
+            link = link_elem.text.strip() if link_elem is not None else ""
+            if link:
+                results.append(f"{title}: {link}")
+        return results or ["Arxiv: No relevant results found."]
     except Exception as e:
         return [f"Arxiv search error: {e}"] 

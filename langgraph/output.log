@@ -84,3 +84,14 @@ LLM called a tool. Executing tool call...
 Calling search_tool with args: {'query': '国内大厂 AI-Agent 最新成果'}
 Tool Result:
 ['2024中国AI Agent最佳实践案例TOP20重磅发布 - CSDN博客: https://blog.csdn.net/m0_59164304/article/details/144381973', '中国AI Agent应用研究报告 2024 - InfoQ: https://www.infoq.cn/minibook/bTgj82D3gFJK9ZLRM5Ci', '28页|2024中国AI Agent最佳实践案例TOP20（附下载） - 知乎: https://zhuanlan.zhihu.com/p/23845747600', '2023年国内AI Agent下项目大盘点，科技大厂与创业公司齐头并进-阿里云开发者社区: https://developer.aliyun.com/article/1413163', 'PDF: https://img.frostchina.com/attachment/17403264/h4LU8jfD51kzthvXd78Cke.pdf', '大厂纷纷入局，百度、阿里、字节抢夺Agent话语权-36氪: https://36kr.com/p/3302254075156992', '国内近 50 款 AI Agent 产品问世，技术足够支撑应用可靠性 ...: https://www.infoq.cn/article/9lBoqN5m9lmeyeFmY8EF', '国内 AI agent 生态格局、大厂策略差异、典型产品挑战、垂 ...: https://xueqiu.com/9094682924/335840428', '2023年国内AI Agent下项目大盘点，科技大厂与创业公司 ...: https://developer.aliyun.com/article/1413163', '中国AI Agent行业研究报告（2025） - AI全书: https://aibook.ren/archives/news-2025-agent-rearch-report']
+
+
+(lang) PS E:\gitlab\agent-notes\langgraph> python -m web.search_tool
+Testing search tool via LLM...
+Invoking LLM with query: Search for papers about VLM Agent
+LLM Response:
+content='' additional_kwargs={'tool_calls': [{'id': '0196f768d04efb2d115218a6074f0e3f', 'function': {'arguments': '{"query": "VLM Agent papers"}', 'name': 'search_tool'}, 'type': 'function'}], 'refusal': None} response_metadata={'token_usage': {'completion_tokens': 24, 'prompt_tokens': 178, 'total_tokens': 202, 'completion_tokens_details': None, 'prompt_tokens_details': None}, 'model_name': 'Qwen/Qwen2.5-72B-Instruct', 'system_fingerprint': '', 'id': '0196f768cd0da457fe06b4ce918b89b0', 'service_tier': None, 'finish_reason': 'tool_calls', 'logprobs': None} id='run--ad062536-933f-42ec-b5cf-9df24be5c3b1-0' tool_calls=[{'name': 'search_tool', 'args': {'query': 'VLM Agent papers'}, 'id': '0196f768d04efb2d115218a6074f0e3f', 'type': 'tool_call'}] usage_metadata={'input_tokens': 178, 'output_tokens': 24, 'total_tokens': 202, 'input_token_details': {}, 'output_token_details': {}}
+LLM called a tool. Executing tool call...
+Calling search_tool with args: {'query': 'VLM Agent papers'}
+Tool Result:
+['Code as Reward: Empowering Reinforcement Learning with VLMs: http://arxiv.org/abs/2402.04764v1', 'RLS3: RL-Based Synthetic Sample Selection to Enhance Spatial Reasoning\n  in Vision-Language Models for Indoor Autonomous Perception: http://arxiv.org/abs/2501.18880v1', 'Does Chain-of-Thought Reasoning Help Mobile GUI Agent? An Empirical\n  Study: http://arxiv.org/abs/2503.16788v1', 'VipAct: Visual-Perception Enhancement via Specialized VLM Agent\n  Collaboration and Tool-use: http://arxiv.org/abs/2410.16400v1', 'Visual Language Models as Operator Agents in the Space Domain: http://arxiv.org/abs/2501.07802v1']
