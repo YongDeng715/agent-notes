@@ -72,3 +72,15 @@ Error during grading: 1 validation error for grade
  '---\n'
  '\n'
  '希望这份推文能够帮助你更好地了解国内外大厂在Agent领域的最新研究成果。如果你有任何问题或需要进一步的信息，请随时告诉我！')
+
+
+
+(lang) PS E:\gitlab\agent-notes\langgraph> python -m web.search_tool
+Testing search tool via LLM...
+Invoking LLM with query: 国内大厂关于AI-Agent的最新成果
+LLM Response:
+content='' additional_kwargs={'tool_calls': [{'id': '0196f758652a420b22292a63d7543e43', 'function': {'arguments': '{"query": "国内大厂 AI-Agent 最新成果"}', 'name': 'search_tool'}, 'type': 'function'}], 'refusal': None} response_metadata={'token_usage': {'completion_tokens': 28, 'prompt_tokens': 180, 'total_tokens': 208, 'completion_tokens_details': None, 'prompt_tokens_details': None}, 'model_name': 'Qwen/Qwen2.5-72B-Instruct', 'system_fingerprint': '', 'id': '0196f758615cfa4480ca27797c65a05b', 'service_tier': None, 'finish_reason': 'tool_calls', 'logprobs': None} id='run--ba63b9a3-3df7-47c4-b635-ddfcbe99ec5b-0' tool_calls=[{'name': 'search_tool', 'args': {'query': '国内大厂 AI-Agent 最新成果'}, 'id': '0196f758652a420b22292a63d7543e43', 'type': 'tool_call'}] usage_metadata={'input_tokens': 180, 'output_tokens': 28, 'total_tokens': 208, 'input_token_details': {}, 'output_token_details': {}}
+LLM called a tool. Executing tool call...
+Calling search_tool with args: {'query': '国内大厂 AI-Agent 最新成果'}
+Tool Result:
+['2024中国AI Agent最佳实践案例TOP20重磅发布 - CSDN博客: https://blog.csdn.net/m0_59164304/article/details/144381973', '中国AI Agent应用研究报告 2024 - InfoQ: https://www.infoq.cn/minibook/bTgj82D3gFJK9ZLRM5Ci', '28页|2024中国AI Agent最佳实践案例TOP20（附下载） - 知乎: https://zhuanlan.zhihu.com/p/23845747600', '2023年国内AI Agent下项目大盘点，科技大厂与创业公司齐头并进-阿里云开发者社区: https://developer.aliyun.com/article/1413163', 'PDF: https://img.frostchina.com/attachment/17403264/h4LU8jfD51kzthvXd78Cke.pdf', '大厂纷纷入局，百度、阿里、字节抢夺Agent话语权-36氪: https://36kr.com/p/3302254075156992', '国内近 50 款 AI Agent 产品问世，技术足够支撑应用可靠性 ...: https://www.infoq.cn/article/9lBoqN5m9lmeyeFmY8EF', '国内 AI agent 生态格局、大厂策略差异、典型产品挑战、垂 ...: https://xueqiu.com/9094682924/335840428', '2023年国内AI Agent下项目大盘点，科技大厂与创业公司 ...: https://developer.aliyun.com/article/1413163', '中国AI Agent行业研究报告（2025） - AI全书: https://aibook.ren/archives/news-2025-agent-rearch-report']
