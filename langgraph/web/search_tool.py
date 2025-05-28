@@ -14,7 +14,7 @@ def get_search_api_names():
     # Support both old 'name' and new 'names' config for backward compatibility
     names = conf.get('SEARCH_API', {}).get('names')
     if names is None:
-        name = conf.get('SEARCH_API', {}).get('name', 'tavily')
+        name = conf.get('SEARCH_API', {}).get('name', 'duckduckgo')
         return [name.lower()]
     return [n.lower() for n in names]
 
@@ -34,6 +34,7 @@ def search_tool(query: str) -> list:
         tool_func = TOOL_MAP.get(name)
         if tool_func:
             try:
+                print(f"Calling {name} search tool...")
                 results = tool_func.invoke(query)
                 if isinstance(results, list):
                     all_results.extend(results)
@@ -50,8 +51,9 @@ def search_tool(query: str) -> list:
 
 search_tools = [search_tool]
 
+
+
 from llm_loader import get_chat_openai
-# Import necessary message types
 from langchain_core.messages import HumanMessage, SystemMessage
 
 if __name__ == "__main__":

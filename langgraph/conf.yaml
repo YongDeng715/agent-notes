@@ -23,17 +23,16 @@ BASIC_MODEL:
 
 
 SEARCH_API:
-  # names: ["tavily", "duckduckgo"]
-  names: ["arxiv"]
+  # names: ["tavily", "duckduckgo", "arxiv"]
+  names: ["duckduckgo"]
 
 TAVILY:
   api_key: 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
+BRAVE:
+  api_key: your-brave-key
 DUCKDUCKGO:
   api_key: not-need-duckduckgo-key
 ARXIV:
   api_key: not-need-arxiv-key
-BRAVE:
-  api_key: your-brave-key
-
 
 
